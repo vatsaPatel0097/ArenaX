@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.core.errors import AppError
+from app.core.exception_handlers import app_error_handler, global_exception_handler
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -8,6 +10,10 @@ app = FastAPI(
     description="ArenaX - Open-Source LLM Battleground & Evaluation Platform Backend API",
     version="0.1.0",
 )
+
+# Exception Handlers Registration
+app.add_exception_handler(AppError, app_error_handler)
+app.add_exception_handler(Exception, global_exception_handler)
 
 # CORS Middleware setup
 app.add_middleware(
