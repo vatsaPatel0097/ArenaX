@@ -53,7 +53,7 @@ def test_registry_with_all_adapters(registry):
 
     # Verify total registered active models
     models = registry.list_models()
-    assert len(models) >= 14
+    assert len(models) == 16
 
     # Verify adapter resolution for model
     assert registry.get_adapter_for_model("meta-llama/llama-3.3-70b-instruct:free").provider_name == "openrouter"
@@ -66,11 +66,13 @@ def test_registry_with_all_adapters(registry):
 @pytest.mark.asyncio
 async def test_missing_api_key_raises_provider_unavailable():
     # If API key is missing/empty, generating response must raise ProviderUnavailableError gracefully
-    adapter = GroqAdapter(api_key="")
-    with pytest.raises(ProviderUnavailableError) as exc_info:
-        async for _ in adapter.generate_response("Hello", "llama-3.3-70b-versatile"):
-            pass
-    assert "Groq API key is not configured" in str(exc_info.value.message)
+    with patch("app.adapters.groq.settings.GROQ_API_KEY", ""):
+        adapter = GroqAdapter(api_key="")
+        with pytest.raises(ProviderUnavailableError) as exc_info:
+            async for _ in adapter.generate_response("Hello", "llama-3.3-70b-versatile"):
+                pass
+        assert "Groq API key is not configured" in str(exc_info.value.message)
+
 
 
 @pytest.mark.asyncio
