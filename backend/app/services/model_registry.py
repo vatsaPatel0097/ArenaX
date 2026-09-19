@@ -120,3 +120,27 @@ class ModelRegistry:
 
 # Global singleton instance for app-wide model registry access
 model_registry = ModelRegistry()
+
+
+def register_default_adapters(registry: ModelRegistry = model_registry) -> None:
+    """Register all built-in LLM provider adapters and their models with the registry."""
+    from app.adapters.cerebras import CerebrasAdapter
+    from app.adapters.google import GoogleAdapter
+    from app.adapters.groq import GroqAdapter
+    from app.adapters.mistral import MistralAdapter
+    from app.adapters.openrouter import OpenRouterAdapter
+
+    default_adapters = [
+        OpenRouterAdapter(),
+        GoogleAdapter(),
+        GroqAdapter(),
+        CerebrasAdapter(),
+        MistralAdapter(),
+    ]
+    for adapter in default_adapters:
+        registry.register_adapter_with_models(adapter)
+
+
+# Auto-register default adapters on singleton creation
+register_default_adapters(model_registry)
+
