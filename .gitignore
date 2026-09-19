@@ -2,8 +2,10 @@
 # ArenaX - Git Ignore Configuration
 # ==============================================================================
 
-# Markdown Documentation Folder (as specified)
+# Centralized Documentation & Agent Configuration
 MDs/
+.agents/
+.gemini/
 
 # FastAPI / Python
 __pycache__/
@@ -18,13 +20,21 @@ env.bak/
 venv.bak/
 .venv/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .coverage
 htmlcov/
+coverage.xml
 dist/
 build/
 *.egg-info/
+
+# IDE & Editor Files
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
 
 # Environment Variables & Secrets
 .env
@@ -44,10 +54,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.log
 
-# Database & Cache local data
+# Database, SQLite & Cache local data
+*.sqlite
 *.sqlite3
 *.db
+*.db-journal
+*.db-shm
+*.db-wal
 dump.rdb
 
 # Operating System Files
@@ -58,3 +73,4 @@ dump.rdb
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
