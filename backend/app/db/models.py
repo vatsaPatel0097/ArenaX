@@ -84,10 +84,11 @@ class Vote(Base):
         String(36), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     battle_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("battles.id", ondelete="CASCADE"), nullable=False, unique=True, index=True
+        String(36), ForeignKey("battles.id", ondelete="CASCADE"), nullable=False, unique=True
     )
     result: Mapped[VoteResult] = mapped_column(
-        SQLEnum(VoteResult, name="vote_result_enum"), nullable=False
+        SQLEnum(VoteResult, name="vote_result_enum", values_callable=lambda x: [e.value for e in x]),
+        nullable=False
     )
     voted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False

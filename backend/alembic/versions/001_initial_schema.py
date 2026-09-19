@@ -63,7 +63,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('battle_id')
     )
-    op.create_index(op.f('ix_votes_battle_id'), 'votes', ['battle_id'], unique=True)
 
     # 4. Create elo_ratings table
     op.create_table(
@@ -86,7 +85,6 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.drop_index(op.f('ix_elo_ratings_rating'), table_name='elo_ratings')
     op.drop_table('elo_ratings')
-    op.drop_index(op.f('ix_votes_battle_id'), table_name='votes')
     op.drop_table('votes')
     # Drop enum type in postgres if needed
     op.execute("DROP TYPE IF EXISTS vote_result_enum")
