@@ -1,12 +1,12 @@
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
+from app.db.session import get_db, AsyncSessionLocal
 from app.schemas.battle import BattleCreateRequest, BattleResponse, BattleStreamChunk
 from app.services.battle_service import BattleService
-from app.core.errors import BattleNotFoundError
+from app.core.errors import BattleAlreadyStreamedError
 
 router = APIRouter()
 battle_service = BattleService()
@@ -39,25 +39,31 @@ async def create_battle(
 @router.get("/{battle_id}/stream")
 async def stream_battle(
     battle_id: str,
-    db: AsyncSession = Depends(get_db)
 ) -> StreamingResponse:
     """
     Stream the parallel responses from Model A and Model B using Server-Sent Events.
     """
-    # Verify the battle exists
-    try:
+    async with AsyncSessionLocal() as db:
+        # Verify the battle exists
         battle = await battle_service.get_battle(db=db, battle_id=battle_id)
-    except BattleNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
-        )
+
+        # Enforce single-use stream state per battle
+        if battle.has_streamed:
+            raise BattleAlreadyStreamedError(battle_id=battle_id)
+
+        battle.has_streamed = True
+        await db.commit()
+
+        # Extract fields to local variables before the DB session is closed
+        prompt = battle.prompt
+        model_a_id = battle.model_a_id
+        model_b_id = battle.model_b_id
 
     async def sse_generator():
         async for chunk in battle_service.run_battle_inference(
-            prompt=battle.prompt,
-            model_a_id=battle.model_a_id,
-            model_b_id=battle.model_b_id,
+            prompt=prompt,
+            model_a_id=model_a_id,
+            model_b_id=model_b_id,
         ):
             # Format according to Server-Sent Events spec
             data = chunk.model_dump_json()
