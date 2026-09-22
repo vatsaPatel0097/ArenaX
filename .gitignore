@@ -3,7 +3,6 @@
 # ==============================================================================
 
 # Centralized Documentation & Agent Configuration
-MDs/
 .agents/
 .gemini/
 
