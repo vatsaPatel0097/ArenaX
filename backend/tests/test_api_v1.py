@@ -82,13 +82,25 @@ def test_create_battle(mock_battle_service):
     assert data["model_a_id"] == "model_a"
     assert data["model_b_id"] == "model_b"
 
-def test_battle_stream(mock_battle_service):
+@pytest.fixture
+def mock_async_session_local():
+    with patch("app.api.v1.battles.AsyncSessionLocal") as mock_session:
+        mock_db = MagicMock()
+        mock_db.commit = AsyncMock()
+        mock_db.add = MagicMock()
+        mock_session.return_value.__aenter__.return_value = mock_db
+        yield mock_db
+
+def test_battle_stream(mock_battle_service, mock_async_session_local):
     # Setup mock battle object
-    mock_battle = MagicMock(spec=Battle)
-    mock_battle.id = "test-uuid"
-    mock_battle.prompt = "test prompt"
-    mock_battle.model_a_id = "model_a"
-    mock_battle.model_b_id = "model_b"
+    # We use a real Battle instance so SQLAlchemy can map it when db.add() is called
+    mock_battle = Battle(
+        id="test-uuid",
+        prompt="test prompt",
+        model_a_id="model_a",
+        model_b_id="model_b",
+        has_streamed=False
+    )
 
     mock_battle_service.get_battle = AsyncMock(return_value=mock_battle)
 
