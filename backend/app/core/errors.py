@@ -82,6 +82,19 @@ class BattleNotFoundError(AppError):
         )
 
 
+class BattleAlreadyStreamedError(AppError):
+    """Raised when an attempt is made to stream a battle that has already been streamed."""
+
+    def __init__(self, battle_id: str, message: Optional[str] = None):
+        msg = message or f"Battle instance '{battle_id}' has already been streamed."
+        super().__init__(
+            message=msg,
+            code="BATTLE_ALREADY_STREAMED",
+            status_code=400,
+            details={"battle_id": battle_id},
+        )
+
+
 class InvalidVoteError(AppError):
     """Raised when a vote payload is invalid or the battle has already been voted on."""
 
