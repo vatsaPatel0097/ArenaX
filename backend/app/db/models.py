@@ -61,6 +61,7 @@ class Battle(Base):
     )
     response_a: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     response_b: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    has_streamed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, nullable=False, index=True
     )
